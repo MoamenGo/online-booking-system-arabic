@@ -1,0 +1,166 @@
+// prisma/schema.prisma - مخطط قاعدة البيانات
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== نموذج العمل التجاري =====
+model Business {
+  id            String    @id @default(uuid())
+  name          String
+  nameEn        String?
+  type          String    // clinic | salon | school | restaurant | other
+  phone         String    @unique
+  email         String?   @unique
+  logo          String?
+  description   String?
+  address       String?
+  city          String?
+  country       String    @default("السعودية")
+  currency      String    @default("SAR")
+  timezone      String    @default("Asia/Riyadh")
+
+  // إعدادات العمل
+  workingDays   String[]
+  workStart     String    @default("09:00")
+  workEnd       String    @default("22:00")
+  slotDuration  Int       @default(30)
+  breakStart    String?
+  breakEnd      String?
+
+  // إعدادات الإشعارات
+  whatsappEnabled  Boolean @default(false)
+  whatsappNumber   String?
+  smsEnabled       Boolean @default(false)
+  emailEnabled     Boolean @default(true)
+
+  // إعدادات الدفع
+  paymentEnabled   Boolean @default(false)
+  paymentMethod    String?
+
+  // العلاقات
+  ownerId   String    @unique
+  owner     User      @relation("BusinessOwner", fields: [ownerId], references: [id])
+  services  Service[]
+  bookings  Booking[]
+  dayOffs   DayOff[]
+  notifications NotificationLog[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// ===== نموذج المستخدم =====
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  phone         String    @unique
+  email         String?   @unique
+  password      String
+  role          String    @default("customer") // owner | customer | staff
+  isActive      Boolean   @default(true)
+
+  ownedBusiness Business? @relation("BusinessOwner")
+  bookings      Booking[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// ===== نموذج الخدمة =====
+model Service {
+  id          String   @id @default(uuid())
+  businessId  String
+  name        String
+  description String?
+  duration    Int
+  price       Float
+  currency    String   @default("SAR")
+  color       String?
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([businessId])
+}
+
+// ===== نموذج الحجز =====
+model Booking {
+  id            String   @id @default(uuid())
+  bookingNumber String   @unique
+  businessId    String
+  serviceId     String
+  customerId    String
+  staffId       String?
+  date          DateTime
+  startTime     String
+  endTime       String
+  status        String   @default("pending") // pending | confirmed | cancelled | completed | no_show
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  notes         String?
+  totalAmount   Float?
+  currency      String   @default("SAR")
+  whatsappSent  Boolean  @default(false)
+  smsSent       Boolean  @default(false)
+  emailSent     Boolean  @default(false)
+  remindedAt    DateTime?
+
+  business Business @relation(fields: [businessId], references: [id])
+  service  Service  @relation(fields: [serviceId], references: [id])
+  customer User     @relation(fields: [customerId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([businessId])
+  @@index([date])
+  @@index([status])
+  @@index([customerId])
+}
+
+// ===== نموذج أيام الإجازة =====
+model DayOff {
+  id         String   @id @default(uuid())
+  businessId String
+  date       DateTime
+  reason     String?
+  isRecurring Boolean @default(false)
+
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime  @default(now())
+
+  @@unique([businessId, date])
+  @@index([businessId])
+}
+
+// ===== سجل الإشعارات =====
+model NotificationLog {
+  id         String   @id @default(uuid())
+  businessId String
+  bookingId  String?
+  type       String   // whatsapp | sms | email
+  to         String
+  message    String
+  status     String   @default("sent") // sent | failed | pending
+  error      String?
+
+  business   Business @relation(fields: [businessId], references: [id])
+
+  createdAt DateTime  @default(now())
+
+  @@index([businessId])
+  @@index([type])
+}

@@ -1,0 +1,192 @@
+@import url('https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===== RTL Setup ===== */
+html {
+  direction: rtl;
+}
+
+/* ===== Arabic Font ===== */
+body {
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  background-color: #faf8ff;
+  color: #131b2e;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== Custom Scrollbar ===== */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #faf8ff;
+}
+::-webkit-scrollbar-thumb {
+  background: #c2c6d6;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #727785;
+}
+
+/* ===== Material Icons ===== */
+.material-symbols-outlined {
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  user-select: none;
+}
+.material-symbols-outlined.filled {
+  font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* ===== LTR Override (for phone numbers, prices, etc.) ===== */
+.dir-ltr {
+  direction: ltr;
+  unicode-bidi: embed;
+}
+
+/* ===== Toggle Switch ===== */
+.toggle-thumb {
+  transition: transform 0.2s ease;
+}
+input:checked ~ .toggle-thumb {
+  transform: translateX(-1.5rem);
+}
+
+/* ===== Animations ===== */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes slideInFromRight {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.3s ease forwards;
+}
+.animate-fade-in {
+  animation: fadeIn 0.2s ease forwards;
+}
+.animate-slide-in {
+  animation: slideInFromRight 0.25s ease forwards;
+}
+
+/* ===== Calendar ===== */
+.calendar-day {
+  @apply h-9 w-9 rounded-full flex items-center justify-center text-label-md cursor-pointer transition-all duration-150;
+}
+.calendar-day:hover:not(.disabled):not(.selected) {
+  @apply bg-surface-container-high;
+}
+.calendar-day.today {
+  @apply border-2 border-primary font-semibold;
+}
+.calendar-day.selected {
+  @apply bg-primary text-on-primary font-semibold;
+}
+.calendar-day.disabled {
+  @apply text-outline-variant cursor-not-allowed line-through;
+}
+.calendar-day.day-off {
+  @apply bg-surface-container text-outline-variant cursor-not-allowed;
+}
+
+/* ===== Time Slot ===== */
+.time-slot {
+  @apply border border-outline-variant rounded-lg py-2 px-3 text-label-md text-center transition-all duration-150 cursor-pointer;
+}
+.time-slot:hover:not(.booked) {
+  @apply border-primary bg-surface-container-low;
+}
+.time-slot.selected {
+  @apply border-2 border-primary bg-surface-container-low text-primary font-semibold;
+}
+.time-slot.booked {
+  @apply bg-surface-container text-outline cursor-not-allowed line-through;
+}
+
+/* ===== Status Badges ===== */
+.badge {
+  @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-caption font-medium;
+}
+.badge-pending  { @apply bg-amber-100 text-amber-800; }
+.badge-confirmed { @apply bg-blue-100 text-blue-800; }
+.badge-completed { @apply bg-green-100 text-green-800; }
+.badge-cancelled { @apply bg-red-100 text-red-800; }
+.badge-no_show   { @apply bg-surface-container text-on-surface-variant; }
+
+/* ===== Step Wizard ===== */
+.step-indicator {
+  @apply w-9 h-9 rounded-full flex items-center justify-center font-semibold text-label-md transition-all duration-200;
+}
+.step-indicator.active   { @apply bg-primary text-on-primary scale-110; }
+.step-indicator.completed { @apply bg-success-500 text-white; }
+.step-indicator.upcoming  { @apply bg-surface-variant text-on-surface-variant; }
+
+/* ===== Card hover ===== */
+.card-hover {
+  @apply transition-shadow duration-200 hover:shadow-md;
+}
+
+/* ===== Service Card selected ===== */
+.service-card {
+  @apply border rounded-lg p-unit-md cursor-pointer transition-all duration-150;
+}
+.service-card.selected {
+  @apply border-2 border-primary bg-surface-container-low;
+}
+.service-card:not(.selected) {
+  @apply border-outline-variant bg-surface-container-lowest hover:border-primary hover:bg-surface-container-high;
+}
+
+/* ===== Sidebar nav link ===== */
+.nav-link {
+  @apply flex flex-row-reverse items-center gap-unit-md p-unit-sm rounded-lg text-label-md transition-all duration-150 cursor-pointer;
+}
+.nav-link.active {
+  @apply bg-primary text-on-primary;
+}
+.nav-link:not(.active) {
+  @apply text-on-surface-variant hover:bg-secondary-container hover:text-on-secondary-container;
+}
+
+/* ===== Modal overlay ===== */
+.modal-overlay {
+  @apply fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4;
+  animation: fadeIn 0.2s ease;
+}
+.modal-box {
+  @apply bg-surface-container-lowest rounded-2xl shadow-modal w-full max-w-lg max-h-[90vh] overflow-y-auto;
+  animation: fadeInUp 0.25s ease;
+}
+
+/* ===== Toast ===== */
+/* react-hot-toast handles most; just ensure RTL */
+[data-hot-toast] {
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  direction: rtl;
+}

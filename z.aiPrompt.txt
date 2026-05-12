@@ -1,0 +1,1586 @@
+# Prompt شامل لبناء نظام حجز مواعيد أونلاين (من الصفر حتى النشر)
+
+---
+
+## 📋 معلومات المشروع الأساسية
+
+```
+اسم المشروع: booking-system
+النوع: نظام حجز مواعيد أونلاين للسوق العربي
+الجمهور المستهدف: عيادات، صالونات، مدارس، مطاعم عربية
+الاتجاه: RTL (من اليمين لليسار)
+اللغة: عربي بالكامل
+```
+
+---
+
+## 🏗️ الهيكل المطلوب تنفيذه بالضبط
+
+```
+booking-system/
+├── frontend/                    ← Next.js 14 (App Router)
+│   ├── app/
+│   │   ├── layout.tsx           (التصميم الرئيسي - RTL + خط عربي)
+│   │   ├── page.tsx             (صفحة الحجز الرئيسية للعميل)
+│   │   ├── login/page.tsx       (تسجيل الدخول)
+│   │   ├── register/page.tsx    (إنشاء حساب)
+│   │   ├── dashboard/
+│   │   │   ├── layout.tsx       (Sidebar + Header للوحة التحكم)
+│   │   │   ├── page.tsx         (نظرة عامة + إحصائيات)
+│   │   │   ├── bookings/page.tsx (إدارة الحجوزات)
+│   │   │   ├── services/page.tsx (إدارة الخدمات)
+│   │   │   ├── reports/page.tsx  (التقارير اليومية)
+│   │   │   ├── settings/page.tsx (إعدادات النظام)
+│   │   │   └── calendar/page.tsx (التقويم الشامل)
+│   │   ├── booking/
+│   │   │   ├── [businessId]/page.tsx (صفحة حجز خاصة بالعمل)
+│   │   │   └── success/page.tsx      (تأكيد الحجز)
+│   │   ├── api/
+│   │   │   ├── auth/[...nextauth]/route.ts
+│   │   │   └── notifications/route.ts
+│   │   └── globals.css
+│   ├── components/
+│   │   ├── ui/                  (مكونات UI أساسية)
+│   │   │   ├── Button.tsx
+│   │   │   ├── Input.tsx
+│   │   │   ├── Card.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   ├── Badge.tsx
+│   │   │   ├── Table.tsx
+│   │   │   ├── Spinner.tsx
+│   │   │   └── Toast.tsx
+│   │   ├── layout/
+│   │   │   ├── Sidebar.tsx
+│   │   │   ├── Header.tsx
+│   │   │   └── Footer.tsx
+│   │   ├── booking/
+│   │   │   ├── Calendar.tsx       (تقويم تفاعلي بالعربي)
+│   │   │   ├── BookingForm.tsx     (نموذج الحجز)
+│   │   │   ├── TimeSlots.tsx      (شبكة الأوقات المتاحة)
+│   │   │   ├── ServiceSelector.tsx (اختيار الخدمة)
+│   │   │   ├── BookingSummary.tsx  (ملخص الحجز)
+│   │   │   └── StepWizard.tsx      (خطوات الحجز المتتالية)
+│   │   ├── dashboard/
+│   │   │   ├── StatsCards.tsx
+│   │   │   ├── TodayBookings.tsx
+│   │   │   ├── BookingTable.tsx
+│   │   │   ├── QuickActions.tsx
+│   │   │   └── Chart.tsx
+│   │   └── auth/
+│   │       ├── LoginForm.tsx
+│   │       └── RegisterForm.tsx
+│   ├── lib/
+│   │   ├── api.ts               (Axios instance)
+│   │   ├── utils.ts             (دوال مساعدة)
+│   │   └── constants.ts         (ثوابت عربية)
+│   ├── hooks/
+│   │   ├── useBookings.ts
+│   │   ├── useServices.ts
+│   │   ├── useAuth.ts
+│   │   └── useCalendar.ts
+│   ├── types/
+│   │   └── index.ts             (أنواع TypeScript)
+│   ├── public/
+│   │   └── images/
+│   ├── tailwind.config.ts
+│   ├── next.config.js
+│   ├── tsconfig.json
+│   └── package.json
+│
+└── backend/                     ← Node.js + Express
+    ├── routes/
+    │   ├── auth.js              (تسجيل دخول / تسجيل / تحديث)
+    │   ├── bookings.js          (CRUD كامل للحجوزات)
+    │   ├── services.js          (CRUD للخدمات)
+    │   ├── business.js          (إعدادات العمل التجاري)
+    │   ├── reports.js           (التقارير والإحصائيات)
+    │   └── notifications.js     (إرسال إشعارات)
+    ├── middleware/
+    │   ├── auth.js              (JWT Guard)
+    │   ├── roleGuard.js         (فحص الصلاحيات)
+    │   └── errorHandler.js      (معالجة الأخطاء)
+    ├── services/
+    │   ├── whatsapp.js          (إشعارات واتساب عبر API)
+    │   ├── sms.js               (إشعارات SMS)
+    │   ├── email.js             (إشعارات بريد إلكتروني - Nodemailer)
+    │   └── payment.js           (دفع إلكتروني - اختياري)
+    ├── prisma/
+    │   ├── schema.prisma        (مخطط قاعدة البيانات)
+    │   ├── seed.js              (بيانات تجريبية عربية)
+    │   └── migrations/
+    ├── utils/
+    │   ├── timeSlots.js         (حساب الأوقات المتاحة)
+    │   ├── validation.js        (تحقق من البيانات)
+    │   └── arabicUtils.js       (تنسيق التواريخ العربية)
+    ├── server.js                (نقطة الدخول)
+    ├── .env.example
+    ├── package.json
+    └── Dockerfile
+```
+
+---
+
+## 🗄️ مخطط قاعدة البيانات (Prisma Schema)
+
+```prisma
+// prisma/schema.prisma
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ===== نموذج العمل التجاري =====
+model Business {
+  id            String    @id @default(uuid())
+  name          String    // اسم العيادة/الصالون/المطعم
+  nameEn        String?   // اسم بالإنجليزي (اختياري)
+  type          String    // clinic | salon | school | restaurant | other
+  phone         String    @unique
+  email         String?   @unique
+  logo          String?
+  description   String?
+  address       String?
+  city          String?
+  country       String    @default("السعودية")
+  currency      String    @default("SAR")
+  timezone      String    @default("Asia/Riyadh")
+  
+  // إعدادات العمل
+  workingDays   String[]  // ["الأحد", "الإثنين", ...]
+  workStart     String    @default("09:00")
+  workEnd       String    @default("22:00")
+  slotDuration  Int       @default(30) // مدة الفاصل بالدقائق
+  breakStart    String?   // وقت استراحة
+  breakEnd      String?   // نهاية استراحة
+  
+  // إعدادات الإشعارات
+  whatsappEnabled  Boolean @default(false)
+  whatsappNumber   String?
+  smsEnabled       Boolean @default(false)
+  emailEnabled     Boolean @default(true)
+  
+  // إعدادات الدفع
+  paymentEnabled   Boolean @default(false)
+  paymentMethod    String?  // tap | moyasar | paypal
+  
+  // العلاقات
+  owner     User      @relation("BusinessOwner")
+  services  Service[]
+  bookings  Booking[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// ===== نموذج المستخدم =====
+model User {
+  id            String    @id @default(uuid())
+  name          String
+  phone         String    @unique
+  email         String?   @unique
+  password      String    // مشفرة بـ bcrypt
+  role          String    @default("customer") // owner | customer | staff
+  isActive      Boolean   @default(true)
+  
+  // العلاقات
+  ownedBusiness Business?  @relation("BusinessOwner")
+  bookings      Booking[]
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+// ===== نموذج الخدمة =====
+model Service {
+  id          String   @id @default(uuid())
+  businessId  String
+  name        String   // "كشف طبي" / "قص شعر" / "حصة تعليمية"
+  description String?
+  duration    Int      // المدة بالدقائق
+  price       Float
+  currency    String   @default("SAR")
+  color       String?  // لون للعرض في التقويم
+  isActive    Boolean  @default(true)
+  sortOrder   Int      @default(0)
+  
+  // العلاقات
+  business Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  bookings Booking[]
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([businessId])
+}
+
+// ===== نموذج الحجز =====
+model Booking {
+  id          String   @id @default(uuid())
+  bookingNumber String @unique // رقم الحجز مثل: BK-2024-0001
+  
+  // معلومات الحجز
+  businessId  String
+  serviceId   String
+  customerId  String
+  staffId     String?  // في حال وجود موظفين
+  
+  // التاريخ والوقت
+  date        DateTime // تاريخ الموعد
+  startTime   String   // "10:00"
+  endTime     String   // "10:30"
+  
+  // الحالة
+  status      String   @default("pending") // pending | confirmed | cancelled | completed | no_show
+  
+  // تفاصيل إضافية
+  customerName  String
+  customerPhone String
+  customerEmail String?
+  notes         String?
+  totalAmount   Float?
+  currency      String  @default("SAR")
+  
+  // الإشعارات
+  whatsappSent  Boolean @default(false)
+  smsSent       Boolean @default(false)
+  emailSent     Boolean @default(false)
+  remindedAt    DateTime?
+  
+  // العلاقات
+  business Business @relation(fields: [businessId], references: [id])
+  service  Service  @relation(fields: [serviceId], references: [id])
+  customer User     @relation(fields: [customerId], references: [id])
+  
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([businessId])
+  @@index([date])
+  @@index([status])
+  @@index([customerId])
+}
+
+// ===== نموذج أيام الإجازة =====
+model DayOff {
+  id         String   @id @default(uuid())
+  businessId String
+  date       DateTime
+  reason     String?
+  isRecurring Boolean @default(false) // يتكرر سنوياً
+  
+  business   Business @relation(fields: [businessId], references: [id], onDelete: Cascade)
+  
+  createdAt DateTime  @default(now())
+
+  @@unique([businessId, date])
+  @@index([businessId])
+}
+
+// ===== نموذج سجل الإشعارات =====
+model NotificationLog {
+  id         String   @id @default(uuid())
+  bookingId  String?
+  businessId String
+  type       String   // whatsapp | sms | email
+  to         String   // رقم الهاتف أو البريد
+  message    String   // محتوى الرسالة
+  status     String   @default("sent") // sent | failed | pending
+  error      String?
+  
+  booking    Booking? @relation(fields: [bookingId], references: [id])
+  business   Business @relation(fields: [businessId], references: [id])
+  
+  createdAt DateTime  @default(now())
+
+  @@index([businessId])
+  @@index([type])
+}
+```
+
+---
+
+## ⚙️ Backend - تنفيذ مفصل
+
+### ملف server.js الرئيسي
+
+```javascript
+// backend/server.js
+// قم بإنشاء سيرفر Express كامل يحتوي على:
+// 1. استيراد جميع الـ dependencies: express, cors, helmet, cookie-parser, morgan
+// 2. الاتصال بقاعدة البيانات عبر Prisma Client
+// 3. إعداد Middlewares: cors (لسماح بالـ frontend), helmet, morgan, JSON parser
+// 4. تسجيل المسارات: /api/auth, /api/bookings, /api/services, /api/business, /api/reports, /api/notifications
+// 5. معالج الأخطاء العام (errorHandler middleware)
+// 6. تشغيل السيرفر على PORT من الـ env أو 5000
+// 7. رسالة ترحيب عربية في الكونسول عند التشغيل
+
+// ملاحظات مهمة:
+// - استخدم cors({ origin: process.env.FRONTEND_URL, credentials: true })
+// - أضف مسار health check: GET /api/health يعيد { status: 'ok', timestamp }
+// - استخدم app.use('/api/auth', require('./routes/auth'))
+// - نفس النمط لباقي المسارات
+```
+
+### ملف routes/auth.js
+
+```javascript
+// backend/routes/auth.js
+// المسارات المطلوبة:
+// 
+// POST /api/auth/register
+//   - استقبال: { name, phone, email (اختياري), password, role? }
+//   - تحقق: الاسم مطلوب، الهاتف مطلوب وفريد، كلمة المرور 6 أحرف على الأقل
+//   - تشفير كلمة المرور بـ bcrypt (10 salt rounds)
+//   - إنشاء مستخدم جديد
+//   - إذا كان الـ role === 'owner': إنشاء Business جديد مرتبط به
+//   - إنشاء JWT token (expiresIn: '7d')
+//   - رد: { user: (بدون password), token }
+//
+// POST /api/auth/login
+//   - استقبال: { phone, password } أو { email, password }
+//   - البحث عن المستخدم
+//   - مقارنة كلمة المرور
+//   - إنشاء JWT
+//   - رد: { user, token, business? }
+//
+// GET /api/auth/me (محمي بـ auth middleware)
+//   - إرجاع بيانات المستخدم الحالي مع بيانات العمل إذا كان owner
+//
+// PUT /api/auth/profile (محمي)
+//   - تحديث الاسم والبريد الإلكتروني
+//
+// PUT /api/auth/password (محمي)
+//   - تغيير كلمة المرور: { currentPassword, newPassword }
+```
+
+### ملف routes/bookings.js
+
+```javascript
+// backend/routes/bookings.js
+// جميع المسارات محمية بـ auth middleware
+//
+// POST /api/bookings
+//   - استقبال: { serviceId, date, startTime, customerName, customerPhone, customerEmail?, notes? }
+//   - تحقق: الخدمة موجودة وتتبع نفس العمل
+//   - حساب endTime بناءً على مدة الخدمة
+//   - تحقق من عدم تعارض الموعد مع حجز آخر (_same business, same date, time overlap_)
+//   - تحقق من أن الموعد ليس في يوم إجازة
+//   - تحقق من أن الموعد ضمن ساعات العمل
+//   - إنشاء رقم حجز فريد: BK-YYYY-NNNN
+//   - إنشاء الحجز
+//   - إرسال إشعار واتساب/SMS/إيميل (حسب الإعدادات)
+//   - رد: الحجز مع رسالة نجاح عربية
+//
+// GET /api/bookings
+//   - استعلام: ?date=2024-01-15&status=pending&page=1&limit=20
+//   - إذا كان owner: عرض حجوزات عمله فقط
+//   - إذا كان customer: عرض حجوزاته فقط
+//   - دعم الفلترة بالتاريخ والحالة
+//   - دعم الـ pagination
+//   - رد: { bookings, total, page, limit }
+//
+// GET /api/bookings/:id
+//   - عرض تفاصيل حجز واحد
+//   - التحقق من الملكية
+//
+// PUT /api/bookings/:id
+//   - تحديث: { status, date?, startTime?, notes? }
+//   - إذا تم تغيير الحالة: إرسال إشعار للعميل
+//   - سجل التغييرات
+//
+// DELETE /api/bookings/:id
+//   - حذف حجز (تغيير الحالة إلى cancelled فعلياً)
+//   - إشعار إلغاء للعميل
+//
+// GET /api/bookings/slots/available
+//   - استعلام: ?date=2024-01-15&serviceId=xxx
+//   - حساب جميع الأوقات المتاحة في ذلك اليوم
+//   - استثناء الأوقات المحجوزة
+//   - استثناء أيام الإجازة
+//   - استثناء أوقات الاستراحة
+//   - رد: { date, slots: [{ time: "09:00", available: true }, ...] }
+//
+// GET /api/bookings/today
+//   - حجوزات اليوم فقط
+//   - مرتبة حسب الوقت
+//   - مفيد للوحة التحكم الرئيسية
+//
+// POST /api/bookings/:id/remind
+//   - إعادة إرسال إشعار تذكير للعميل
+```
+
+### ملف routes/services.js
+
+```javascript
+// backend/routes/services.js
+// جميع المسارات محمية + roleGuard('owner', 'staff')
+//
+// GET /api/services
+//   - عرض خدمات العمل (مرتبة بـ sortOrder)
+//   - فقط الخدمات الفعالة (isActive: true) للعملاء
+//   - جميع الخدمات للمالك
+//
+// POST /api/services
+//   - استقبال: { name, description, duration, price, color, isActive, sortOrder }
+//   - التحقق من البيانات
+//   - إنشاء خدمة جديدة
+//
+// PUT /api/services/:id
+//   - تحديث الخدمة
+//
+// DELETE /api/services/:id
+//   - حذف منطقي (isActive: false) أو حذف فعلي إذا لم توجد حجوزات مرتبطة
+//
+// PUT /api/services/reorder
+//   - استقبال: { orders: [{ id, sortOrder }, ...] }
+//   - إعادة ترتيب الخدمات
+```
+
+### ملف routes/reports.js
+
+```javascript
+// backend/routes/reports.js
+// محمية + roleGuard('owner')
+//
+// GET /api/reports/daily?date=2024-01-15
+//   - عدد الحجوزات في ذلك اليوم
+//   - عدد الحجوزات حسب الحالة
+//   - إجمالي الإيرادات
+//   - قائمة الحجوزات التفصيلية
+//
+// GET /api/reports/weekly?startDate=2024-01-15&endDate=2024-01-22
+//   - إحصائيات أسبوعية
+//   - مقارنة بالأسبوع السابق
+//   - رسم بياني يومي
+//
+// GET /api/reports/monthly?month=2024-01
+//   - إحصائيات شهرية
+//   - أكثر الخدمات طلباً
+//   - معدل الإلغاء
+//   - إجمالي الإيرادات
+//
+// GET /api/reports/overview
+//   - إحصائيات عامة للوحة التحكم:
+//     - حجوزات اليوم
+//     - حجوزات هذا الأسبوع
+//     - إجمالي الشهر
+//     - أكثر خدمة طلباً
+//     - آخر 5 حجوزات
+```
+
+### ملف middleware/auth.js
+
+```javascript
+// backend/middleware/auth.js
+// JWT Authentication Middleware
+//
+// 1. قراءة الـ token من Header: Authorization: Bearer <token>
+//    أو من cookie: token
+// 2. التحقق من وجود الـ token
+// 3. فك تشفير الـ token بـ jwt.verify (استخدم JWT_SECRET من env)
+// 4. البحث عن المستخدم في قاعدة البيانات
+// 5. التحقق من أن المستخدم isActive
+// 6. إضافة المستخدم إلى req.user
+// 7. استدعاء next()
+//
+// في حال أي خطأ: رد 401 مع رسالة عربية مناسبة
+```
+
+### ملف middleware/roleGuard.js
+
+```javascript
+// backend/middleware/roleGuard.js
+// module.exports = (...allowedRoles) => (req, res, next) => {
+//   التحقق من أن req.user.role موجود ضمن allowedRoles
+//   إذا لا: رد 403 { message: 'ليس لديك صلاحية للوصول' }
+// }
+```
+
+### ملف services/whatsapp.js
+
+```javascript
+// backend/services/whatsapp.js
+// إرسال إشعارات واتساب
+//
+// استخدم WhatsApp Business API أو مزود خدمة مثل:
+// - UltraMsg API
+// - Twilio WhatsApp
+// - أو أي API يدعم إرسال واتساب
+//
+// الدالة المطلوبة:
+// sendWhatsAppNotification({ to, message, businessId })
+//
+// رسائل عربية جاهزة:
+// - رسالة تأكيد حجز جديدة
+// - رسالة تذكير قبل الموعد
+// - رسالة إلغاء حجز
+// - رسالة تغيير موعد
+//
+// مثال رسالة تأكيد:
+// "مرحباً {customerName} 👋
+//  تم تأكيد حجزك بنجاح في {businessName}
+//  📅 التاريخ: {date}
+//  🕐 الوقت: {startTime} - {endTime}
+//  💈 الخدمة: {serviceName}
+//  💰 المبلغ: {price} {currency}
+//  رقم الحجز: {bookingNumber}
+//  شكراً لاختيارك!"
+```
+
+### ملف services/email.js
+
+```javascript
+// backend/services/email.js
+// إرسال إشعارات بريد إلكتروني باستخدام Nodemailer
+//
+// الإعداد:
+// - SMTP host, port, user, pass من env
+// - دعم Gmail SMTP
+//
+// الدوال المطلوبة:
+// sendBookingConfirmation(booking, business)
+// sendBookingReminder(booking, business)
+// sendBookingCancellation(booking, business)
+//
+// كل دالة تستقبل قالب HTML عربي RTL
+// استخدم inline styles (لا تعتمد على CSS خارجي في الإيميل)
+// التصميم: بسيط، احترافي، ألوان متوافقة مع هوية النظام
+```
+
+### ملف utils/timeSlots.js
+
+```javascript
+// backend/utils/timeSlots.js
+// دالة حساب الأوقات المتاحة
+//
+// generateTimeSlots({ workStart, workEnd, slotDuration, breakStart, breakEnd, existingBookings, serviceDuration, date })
+//
+// الخطوات:
+// 1. إنشاء مصفوفة جميع الأوقات الممكنة من workStart إلى workEnd بفواصل slotDuration
+// 2. استثناء أوقات الاستراحة (breakStart إلى breakEnd)
+// 3. استثناء الأوقات المحجوزة مع مراعاة مدة الخدمة المطلوبة
+//    (إذا كانت الخدمة 45 دقيقة وحجز موجود 10:00-10:30،
+//     لا يمكن حجز يبدأ من 10:00 إلى 10:15 لأنه سيتعارض)
+// 4. التحقق من أن الوقت لم يمر (لا عرض أوقات ماضية في نفس اليوم)
+// 5. إرجاع: [{ time: "09:00", available: true, label: "9:00 صباحاً" }, ...]
+//
+// تنسيق الأوقات بالعربي:
+// - 09:00 → "9:00 صباحاً"
+// - 12:00 → "12:00 ظهراً"
+// - 14:00 → "2:00 مساءً"
+// - 18:00 → "6:00 مساءً"
+// - 21:00 → "9:00 مساءً"
+```
+
+### ملف prisma/seed.js
+
+```javascript
+// backend/prisma/seed.js
+// بيانات تجريبية عربية كاملة للاختبار
+//
+// 1. إنشاء مستخدم مالك:
+//    - name: "د. أحمد محمد"
+//    - phone: "+966501234567"
+//    - email: "dr.ahmed@clinic.com"
+//    - password: "123456" (مشفر)
+//    - role: "owner"
+//
+// 2. إنشاء عمل تجاري (عيادة أسنان):
+//    - name: "عيادة الابتسامة لطب الأسنان"
+//    - type: "clinic"
+//    - workingDays: ["الأحد", "الإثنين", "الثلاثاء", "الأربعاء", "الخميس"]
+//    - workStart: "09:00"
+//    - workEnd: "21:00"
+//    - slotDuration: 30
+//    - breakStart: "13:00"
+//    - breakEnd: "15:00"
+//
+// 3. إنشاء خدمات:
+//    - "كشف عام" - 30 دقيقة - 100 ريال
+//    - "تنظيف أسنان" - 45 دقيقة - 200 ريال
+//    - "حشو عصب" - 60 دقيقة - 500 ريال
+//    - "تقويم أسنان" - 30 دقيقة - 300 ريال
+//    - "خلع ضرس" - 45 دقيقة - 350 ريال
+//    - "تبييض أسنان" - 60 دقيقة - 800 ريال
+//
+// 4. إنشاء مستخدمين عملاء:
+//    - "فاطمة علي" - +966509876543
+//    - "محمد خالد" - +966507654321
+//    - "نورة سعد" - +966506543210
+//
+// 5. إنشاء حجوزات تجريبية لأيام مختلفة بحالات مختلفة
+//
+// 6. إنشاء يوم إجازة:
+//    - date: nearest Friday
+//    - reason: "عطلة نهاية الأسبوع"
+```
+
+### ملف .env.example للـ backend
+
+```env
+# backend/.env.example
+PORT=5000
+NODE_ENV=development
+
+# قاعدة البيانات
+DATABASE_URL=postgresql://user:password@localhost:5432/booking_system
+
+# JWT
+JWT_SECRET=your-super-secret-jwt-key-change-in-production
+JWT_EXPIRES_IN=7d
+
+# Frontend URL (لـ CORS)
+FRONTEND_URL=http://localhost:3000
+
+# SMTP (بريد إلكتروني)
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_USER=your-email@gmail.com
+SMTP_PASS=your-app-password
+FROM_EMAIL=noreply@bookingsystem.com
+FROM_NAME=نظام الحجز
+
+# WhatsApp API (اختياري)
+WHATSAPP_API_URL=https://api.ultramsg.com/xxx/
+WHATSAPP_TOKEN=your-whatsapp-token
+WHATSAPP_INSTANCE_ID=your-instance-id
+
+# SMS API (اختياري)
+SMS_API_KEY=your-sms-api-key
+SMS_SENDER=BOOKING
+
+# Payment (اختياري)
+TAP_SECRET_KEY=sk_test_xxx
+MOYASAR_API_KEY=your-moyasar-key
+MOYASAR_PUBLISHABLE_KEY=pk_test_xxx
+```
+
+---
+
+## 🎨 Frontend - تنفيذ مفصل
+
+### ملف app/layout.tsx
+
+```tsx
+// frontend/app/layout.tsx
+// يجب أن يحتوي على:
+// 1. إعدادات HTML lang="ar" dir="rtl"
+// 2. استيراد خط عربي من Google Fonts: 
+//    - "IBM Plex Sans Arabic" أو "Tajawal" أو "Cairo"
+//    - استخدم next/font/google
+// 3. استيراد globals.css
+// 4. ToastProvider أو NotificationProvider (للإشعارات)
+// 5. AuthProvider (context للمصادقة)
+// 6. Metadata عربية:
+//    - title: "نظام الحجز الذكي"
+//    - description: "نظام حجز مواعيد أونلاين للعيادات والصالونات والمدارس والمطاعم"
+```
+
+### ملف tailwind.config.ts
+
+```typescript
+// frontend/tailwind.config.ts
+// إعدادات Tailwind مخصصة للعربي:
+//
+// 1. direction: 'rtl' كقيمة افتراضية
+// 2. fontFamily: {
+//      arabic: ['IBM Plex Sans Arabic', 'Tajawal', 'sans-serif']
+//    }
+// 3. colors مخصصة:
+//    colors: {
+//      primary: {
+//        50: '#eff6ff',
+//        100: '#dbeafe',
+//        200: '#bfdbfe',
+//        300: '#93c5fd',
+//        400: '#60a5fa',
+//        500: '#3b82f6',  // اللون الأساسي
+//        600: '#2563eb',
+//        700: '#1d4ed8',
+//        800: '#1e40af',
+//        900: '#1e3a8a',
+//      },
+//      success: { 500: '#22c55e', 600: '#16a34a' },
+//      warning: { 500: '#f59e0b', 600: '#d97706' },
+//      danger:  { 500: '#ef4444', 600: '#dc2626' },
+//    }
+// 4. spacing موسع إذا لزم
+// 5. boxShadow مخصصة للكروت
+// 6. borderRadius: { xl: '1rem', '2xl': '1.5rem' }
+```
+
+### ملف app/page.tsx (صفحة الحجز الرئيسية)
+
+```tsx
+// frontend/app/page.tsx
+// هذه هي الصفحة التي يراها العميل عند الدخول
+//
+// التصميم (من الأعلى للأسفل):
+//
+// 1. Header بسيط:
+//    - شعار النظام "نظام الحجز الذكي"
+//    - اسم العمل التجاري
+//    - زر "تسجيل الدخول" (إذا لم يسجل)
+//    - زر "لوحة التحكم" (إذا كان مالك)
+//
+// 2. Hero Section:
+//    - عنوان ترحيبي: "احجز موعدك بسهولة"
+//    - وصف مختصر
+//
+// 3. منطقة الحجز الرئيسية (Card كبير في المنتصف):
+//    أ. اختيار الخدمة (ServiceSelector):
+//       - عرض الخدمات كـ cards أو list
+//       - كل خدمة تعرض: الاسم، المدة، السعر، لون مميز
+//       - اختيار واحدة فقط
+//
+//    ب. التقويم (Calendar):
+//       - تقويم شهري عربي (أسماء الأيام بالعربي)
+//       - أسماء الشهور بالعربي (محرم، صفر، ربيع الأول... أو يناير، فبراير...)
+//       - تعطيل أيام الإجازة
+//       - تعطيل الأيام الماضية
+//       - تمييز يوم اليوم
+//       - السماح باختيار يوم فقط من أيام العمل المحددة
+//
+//    ج. الأوقات المتاحة (TimeSlots):
+//       - شبكة Grid من الأزرار
+//       - الأوقات المتاحة: ممكنة النقر
+//       - الأوقات المحجوزة: معطلة ولون رمادي
+//       - الوقت المحدد: مميز بلون أساسي
+//       - تنسيق الوقت بالعربي (9:00 صباحاً)
+//
+//    د. نموذج بيانات العميل (BookingForm):
+//       - الاسم (مطلوب)
+//       - رقم الجوال (مطلوب، مع prefix +966)
+//       - البريد الإلكتروني (اختياري)
+//       - ملاحظات (اختياري، textarea)
+//
+//    هـ. ملخص الحجز (BookingSummary):
+//       - عرض كل ما تم اختياره
+//       - الخدمة + التاريخ + الوقت + الاسم + الهاتف
+//       - زر "تأكيد الحجز" كبير وواضح
+//
+// 4. Footer بسيط:
+//    - "جميع الحقوق محفوظة © 2024"
+//
+// السلوك:
+// - استخدام StepWizard (خطوات متتالية) أو عرض كل شيء في صفحة واحدة
+// - عند تغيير الخدمة أو التاريخ: إعادة جلب الأوقات المتاحة
+// - عند تأكيد الحجز: إرسال طلب POST وإعادة توجيه لصفحة النجاح
+// - حالة تحميل واضحة أثناء جلب البيانات وتأكيد الحجز
+```
+
+### ملف components/booking/Calendar.tsx
+
+```tsx
+// frontend/components/booking/Calendar.tsx
+// تقويم تفاعلي كامل بالعربي
+//
+// Props:
+// - selectedDate: Date | null
+// - onDateSelect: (date: Date) => void
+// - workingDays: string[] (أيام العمل)
+// - dayOffs: Date[] (أيام الإجازة)
+// - bookedDates: Date[] (أيام بها حجوزات - لتمييزها بنقطة)
+//
+// الميزات:
+// 1. عرض شهر كامل في Grid (7 أعمدة × 5-6 صفوف)
+// 2. أسماء الأيام: ["أحد", "إثنين", "ثلاثاء", "أربعاء", "خميس", "جمعة", "سبت"]
+// 3. اسم الشهر الحالي: "يناير 2024" مع أزرار التنقل
+// 4. كل يوم يعرض رقم اليوم فقط
+// 5. حالات اليوم:
+//    - يوم عادي: خلفية بيضاء، نص رمادي داكن
+//    - يوم اليوم (today): حدود أساسية
+//    - يوم محدد (selected): خلفية أساسية، نص أبيض
+//    - يوم ماضي: نص رمادي فاتح، معطل
+//    - يوم إجازة/غير عمل: خلفية رمادية فاتحة جداً، خط يمر على النص، معطل
+//    - يوم به حجوزات: نقرة صغيرة أسفل الرقم
+// 6. أزرار التنقل بين الأشهر: "< يناير 2024 >"
+// 7. زر "العودة لليوم" (Go to today)
+// 8. لا تستخدم مكتبة خارجية - ابنيه بـ React خالص
+// 9. أنيميشن بسيطة عند تغيير الشهر (fade)
+```
+
+### ملف components/booking/TimeSlots.tsx
+
+```tsx
+// frontend/components/booking/TimeSlots.tsx
+// شبكة الأوقات المتاحة
+//
+// Props:
+// - slots: { time: string, available: boolean, label: string }[]
+// - selectedTime: string | null
+// - onTimeSelect: (time: string) => void
+// - isLoading: boolean
+//
+// التصميم:
+// - Grid من 3 أو 4 أعمدة (responsive)
+// - كل وقت زر مستطيل أو مدور
+// - الحالات:
+//   - متاح: خلفية بيضاء، حدود رمادية، hover: حدود أساسية
+//   - محجوز/غير متاح: خلفية رمادية فاتحة، نص خطوسط، cursor-not-allowed
+//   - محدد: خلفية أساسية، نص أبيض
+// - إذا لم يتم اختيار تاريخ: رسالة "اختر تاريخاً أولاً"
+// - إذا لم توجد أوقات متاحة: رسالة "لا توجد أوقات متاحة في هذا اليوم"
+// - حالة تحميل: Skeleton placeholders
+```
+
+### ملف components/booking/StepWizard.tsx
+
+```tsx
+// frontend/components/booking/StepWizard.tsx
+// مكون خطوات الحجز المتتالية
+//
+// Props:
+// - steps: { title: string, icon?: string }[]
+// - currentStep: number
+// - children: ReactNode
+//
+// التصميم:
+// - شريط تقدم أفقي في الأعلى
+// - خط يصل بين النقاط
+// - كل نقطة: رقم الخطوة + العنوان تحتها
+// - الخطوات المكتملة: لون أخضر + علامة صح
+// - الخطوة الحالية: لون أساسي + أكبر حجماً
+// - الخطوات القادمة: رمادية
+//
+// خطوات الحجز:
+// 1. "اختر الخدمة"
+// 2. "اختر الموعد"
+// 3. "بياناتك"
+// 4. "تأكيد الحجز"
+```
+
+### ملف app/dashboard/layout.tsx
+
+```tsx
+// frontend/app/dashboard/layout.tsx
+// تصميم لوحة التحكم
+//
+// الهيكل:
+// ┌──────────────────────────────────────────────┐
+// │ Header (شريط علوي)                          │
+// ├──────────┬───────────────────────────────────┤
+// │          │                                   │
+// │ Sidebar  │   Main Content (children)         │
+// │ (قائمة   │                                   │
+// │  جانبية) │                                   │
+// │          │                                   │
+// │          │                                   │
+// └──────────┴───────────────────────────────────┘
+//
+// Sidebar يحتوي على:
+// - شعار النظام
+// - اسم المالك
+// - اسم العمل التجاري
+// - القوائم:
+//   📊 نظرة عامة (/dashboard)
+//   📅 التقويم (/dashboard/calendar)
+//   📋 الحجوزات (/dashboard/bookings)
+//   ⚙️ الخدمات (/dashboard/services)
+//   📈 التقارير (/dashboard/reports)
+//   ⚙️ الإعدادات (/dashboard/settings)
+//   🚪 تسجيل الخروج
+//
+// - القائمة المنشطة مميزة بلون أساسي + خلفية فاتحة
+// - إمكانية طي الـ Sidebar في الشاشات الصغيرة (hamburger menu)
+// - في الموبايل: Sidebar يتحول لـ drawer من اليمين
+//
+// Header يحتوي على:
+// - عنوان الصفحة الحالية
+// - أيقونة الإشعارات (مع badge للعدد)
+// - صورة/حرف أول من اسم المالك
+// - قائمة منسدلة: الملف الشخصي، الإعدادات، تسجيل الخروج
+```
+
+### ملف app/dashboard/page.tsx
+
+```tsx
+// frontend/app/dashboard/page.tsx
+// لوحة التحكم الرئيسية
+//
+// المحتوى (من الأعلى للأسفل):
+//
+// 1. ترحيب: "مرحباً، د. أحمد 👋"
+//    تاريخ اليوم بالعربي: "الأحد، 15 يناير 2024"
+//
+// 2. بطاقات الإحصائيات (StatsCards) - Grid من 4:
+//    ├── حجوزات اليوم: 8 (أيقونة تقويم)
+//    ├── هذا الأسبوع: 32 (أيقونة رسم بياني)
+//    ├── إجمالي الشهر: 120 (أيقونة جدول)
+//    └── إيرادات الشهر: 15,000 ريال (أيقونة عملة)
+//    كل بطاقة: لون خلفية مختلف خفيف، رقم كبير، وصف صغير
+//
+// 3. قسمين جنباً إلى جنب (Grid 2 أعمدة):
+//    أ. حجوزات اليوم (TodayBookings):
+//       - قائمة حجوزات اليوم مرتبة زمنياً
+//       - كل حجز: الوقت، اسم العميل، الخدمة، الحالة (Badge)
+//       - أزرار سريعة: تأكيد / إلغاء
+//       - إذا لم توجد: "لا توجد حجوزات اليوم"
+//
+//    ب. إجراءات سريعة (QuickActions):
+//       - زر "إضافة حجز يدوي"
+//       - زر "إضافة خدمة جديدة"
+//       - زر "عرض تقويم اليوم"
+//       - زر "تصدير تقرير اليوم"
+//
+// 4. آخر الحجوزات (جدول صغير):
+//    - آخر 5 حجوزات من أي يوم
+//    - أعمدة: الرقم، العميل، الخدمة، التاريخ، الوقت، الحالة
+```
+
+### ملف app/dashboard/bookings/page.tsx
+
+```tsx
+// frontend/app/dashboard/bookings/page.tsx
+// إدارة الحجوزات الكاملة
+//
+// 1. شريط أدوات علوي:
+//    - فلتر الحالة: dropdown (الكل، معلق، مؤكد، مكتمل، ملغي، لم يحضر)
+//    - فلتر التاريخ: date picker (من - إلى)
+//    - بحث: input للبحث بالاسم أو رقم الجوال أو رقم الحجز
+//    - زر "إضافة حجز يدوي" (يفتح Modal)
+//
+// 2. جدول الحجوزات (BookingTable):
+//    أعمدة:
+//    - رقم الحجز (BK-2024-0001) مع لون حسب الحالة
+//    - اسم العميل
+//    - رقم الجوال
+//    - الخدمة
+//    - التاريخ
+//    - الوقت
+//    - الحالة (Badge ملون):
+//        معلق = أصفر
+//        مؤكد = أزرق
+//        مكتمل = أخضر
+//        ملغي = أحمر
+//        لم يحضر = رمادي
+//    - إجراءات:
+//        ├── أيقونة تأكيد (إذا كان معلق)
+//        ├── أيقونة إكمال (إذا كان مؤكد)
+//        ├── أيقونة إلغاء
+//        ├── أيقونة تذكير (إرسال إشعار)
+//        └── أيقونة تفاصيل (فتح Modal)
+//
+// 3. Pagination في الأسفل
+//
+// 4. Modal تفاصيل الحجز:
+//    - كل معلومات الحجز
+//    - أزرار تغيير الحالة
+//    - زر إرسال تذكير
+//    - زر طباعة
+//
+// 5. Modal إضافة حجز يدوي:
+//    - نفس نموذج الحجز لكن مع اختيار العميل من القائمة
+//    - أو إضافة عميل جديد
+```
+
+### ملف app/dashboard/services/page.tsx
+
+```tsx
+// frontend/app/dashboard/services/page.tsx
+// إدارة الخدمات
+//
+// 1. زر "إضافة خدمة جديدة" في الأعلى
+//
+// 2. شبكة الخدمات (Cards أو Table):
+//    كل خدمة تعرض:
+//    - شريط لوني علوي (بـ color الخدمة)
+//    - اسم الخدمة (خط كبير)
+//    - الوصف (خط صغير رمادي)
+//    - المدة: "30 دقيقة"
+//    - السعر: "100 ريال"
+//    - حالة التفعيل (Toggle switch)
+//    - أزرار: تعديل، حذف
+//
+// 3. Modal إضافة/تعديل خدمة:
+//    - اسم الخدمة (مطلوب)
+//    - الوصف
+//    - المدة بالدقائق (مطلوب، رقم)
+//    - السعر (مطلوب، رقم)
+//    - اللون (Color picker)
+//    - حالة التفعيل (Toggle)
+//
+// 4. تأكيد الحذف: Dialog "هل أنت متأكد من حذف هذه الخدمة؟"
+//    مع تحذيم إذا كانت موجودة في حجوزات سابقة
+```
+
+### ملف app/dashboard/reports/page.tsx
+
+```tsx
+// frontend/app/dashboard/reports/page.tsx
+// صفحة التقارير
+//
+// 1. تبويبات (Tabs):
+//    ├── يومي
+//    ├── أسبوعي
+//    └── شهري
+//
+// 2. لكل تبويب:
+//    أ. فلتر التاريخ (date picker أو date range)
+//    ب. بطاقات إحصائية:
+//       - إجمالي الحجوزات
+//       - الحجوزات المؤكدة
+//       - الحجوزات الملغاة
+//       - معدل الإلغاء (%)
+//       - إجمالي الإيرادات
+//    ج. رسم بياني (Chart):
+//       - Bar chart: عدد الحجوزات لكل يوم
+//       - أو Line chart: الاتجاه خلال الفترة
+//       - استخدم Recharts أو Chart.js
+//    د. جدول الخدمات الأكثر طلباً:
+//       - اسم الخدمة | عدد الحجوزات | الإيرادات | النسبة
+//    هـ. زر "تصدير كـ PDF" أو "تصدير كـ Excel" (اختياري)
+```
+
+### ملف app/dashboard/settings/page.tsx
+
+```tsx
+// frontend/app/dashboard/settings/page.tsx
+// إعدادات النظام
+//
+// قسمة لعدة تبويبات أو أقسام:
+//
+// 1. معلومات العمل التجاري:
+//    - اسم العمل
+//    - النوع (dropdown: عيادة، صالون، مدرسة، مطعم، أخرى)
+//    - رقم الهاتف
+//    - البريد الإلكتروني
+//    - العنوان
+//    - المدينة
+//    - الوصف
+//    - رفع الشعار (optional)
+//
+// 2. ساعات العمل:
+//    - أيام العمل (Checkbox group للأيام بالعربي)
+//    - وقت بداية العمل (Time picker)
+//    - وقت نهاية العمل (Time picker)
+//    - وقت بداية الاستراحة
+//    - وقت نهاية الاستراحة
+//    - مدة الفاصل الزمني (dropdown: 15، 20، 30، 45، 60 دقيقة)
+//
+// 3. أيام الإجازة:
+//    - إضافة يوم إجازة: تاريخ + السبب
+//    - قائمة أيام الإجازة مع إمكانية الحذف
+//
+// 4. إعدادات الإشعارات:
+//    - تفعيل/تعطيل واتساب (Toggle) + رقم واتساب
+//    - تفعيل/تعطيل SMS (Toggle)
+//    - تفعيل/تعطيل البريد الإلكتروني (Toggle)
+//    - إعدادات التذكير التلقائي: قبل كم ساعة؟ (dropdown: 1، 2، 4، 24)
+//
+// 5. إعدادات الدفع (اختياري):
+//    - تفعيل الدفع الإلكتروني (Toggle)
+//    - اختيار بوابة الدفع (Tap / Moyasar)
+//    - مفتاح API
+//
+// 6. تغيير كلمة المرور:
+//    - كلمة المرور الحالية
+//    - كلمة المرور الجديدة
+//    - تأكيد كلمة المرور
+//
+// زر "حفظ التغييرات" في كل قسم
+```
+
+### ملف app/login/page.tsx
+
+```tsx
+// frontend/app/login/page.tsx
+// صفحة تسجيل الدخول
+//
+// تصميم مركزي أنيق:
+// - خلفية متدرجة خفيفة أو نمط
+// - Card في المنتصف:
+//   - شعار النظام
+//   - عنوان: "تسجيل الدخول"
+//   - حقل رقم الجوال: مع prefix +966 ثابت
+//   - حقل كلمة المرور: مع أيقونة إظهار/إخفاء
+//   - زر "تسجيل الدخول" (كامل العرض، أساسي)
+//   - رابط "نسيت كلمة المرور؟" (يمكن أن يكون placeholder)
+//   - فاصل: "أو"
+//   - رابط "إنشاء حساب جديد" (للأعمال التجارية)
+// - في الأسفل: "العودة للصفحة الرئيسية"
+//
+// التعامل مع الأخطاء:
+// - بيانات غير صحيحة: رسالة حمراء "رقم الجوال أو كلمة المرور غير صحيحة"
+// - حساب معطل: "تم تعطيل هذا الحساب، تواصل مع الدعم"
+```
+
+### ملف lib/api.ts
+
+```typescript
+// frontend/lib/api.ts
+// إعداد Axios instance
+//
+// const api = axios.create({
+//   baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api',
+//   timeout: 15000,
+//   headers: {
+//     'Content-Type': 'application/json',
+//     'Accept-Language': 'ar',
+//   },
+// });
+//
+// Interceptors:
+// 1. Request interceptor:
+//    - إضافة Authorization header من localStorage
+//    - إضافة token من cookie إذا موجود
+//
+// 2. Response interceptor:
+//    - في حال 401: محاولة refresh token أو تسجيل خروج تلقائي
+//    - في حال 403: رسالة "ليس لديك صلاحية"
+//    - في حال أخطاء أخرى: إظهار toast بالرسالة العربية من الـ response
+//
+// دوال جاهزة:
+// - authAPI: { login, register, getMe, updateProfile, changePassword }
+// - bookingsAPI: { getAll, getById, create, update, cancel, getAvailableSlots, getToday, remind }
+// - servicesAPI: { getAll, create, update, delete, reorder }
+// - reportsAPI: { getDaily, getWeekly, getMonthly, getOverview }
+// - businessAPI: { getSettings, updateSettings, getDayOffs, addDayOff, removeDayOff }
+```
+
+### ملف lib/constants.ts
+
+```typescript
+// frontend/lib/constants.ts
+// ثوابت عربية
+//
+// export const ARABIC_DAYS = [
+//   'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'جمعة', 'السبت'
+// ];
+//
+// export const ARABIC_MONTHS = [
+//   'يناير', 'فبراير', 'مارس', 'أبريل', 'مايو', 'يونيو',
+//   'يوليو', 'أغسطس', 'سبتمبر', 'أكتوبر', 'نوفمبر', 'ديسمبر'
+// ];
+//
+// export const BUSINESS_TYPES = [
+//   { value: 'clinic', label: 'عيادة' },
+//   { value: 'salon', label: 'صالون تجميل' },
+//   { value: 'school', label: 'مدرسة / مركز تعليمي' },
+//   { value: 'restaurant', label: 'مطعم / كافيه' },
+//   { value: 'gym', label: 'نادي رياضي' },
+//   { value: 'other', label: 'أخرى' },
+// ];
+//
+// export const BOOKING_STATUS = {
+//   pending: { label: 'معلق', color: 'yellow', bg: 'bg-yellow-100 text-yellow-800' },
+//   confirmed: { label: 'مؤكد', color: 'blue', bg: 'bg-blue-100 text-blue-800' },
+//   completed: { label: 'مكتمل', color: 'green', bg: 'bg-green-100 text-green-800' },
+//   cancelled: { label: 'ملغي', color: 'red', bg: 'bg-red-100 text-red-800' },
+//   no_show: { label: 'لم يحضر', color: 'gray', bg: 'bg-gray-100 text-gray-800' },
+// };
+//
+// export const SLOT_DURATIONS = [
+//   { value: 15, label: '15 دقيقة' },
+//   { value: 20, label: '20 دقيقة' },
+//   { value: 30, label: '30 دقيقة' },
+//   { value: 45, label: '45 دقيقة' },
+//   { value: 60, label: 'ساعة واحدة' },
+// ];
+//
+// export const CURRENCIES = {
+//   SAR: { name: 'ريال سعودي', symbol: 'ر.س' },
+//   AED: { name: 'درهم إماراتي', symbol: 'د.إ' },
+//   EGP: { name: 'جنيه مصري', symbol: 'ج.م' },
+//   KWD: { name: 'دينار كويتي', symbol: 'د.ك' },
+//   QAR: { name: 'ريال قطري', symbol: 'ر.ق' },
+//   BHD: { name: 'دينار بحريني', symbol: 'د.ب' },
+//   OMR: { name: 'ريال عماني', symbol: 'ر.ع' },
+//   JOD: { name: 'دينار أردني', symbol: 'د.أ' },
+// };
+```
+
+### ملف types/index.ts
+
+```typescript
+// frontend/types/index.ts
+//
+// export interface User {
+//   id: string;
+//   name: string;
+//   phone: string;
+//   email?: string;
+//   role: 'owner' | 'customer' | 'staff';
+//   isActive: boolean;
+//   ownedBusiness?: Business;
+//   createdAt: string;
+// }
+//
+// export interface Business {
+//   id: string;
+//   name: string;
+//   type: string;
+//   phone: string;
+//   email?: string;
+//   logo?: string;
+//   description?: string;
+//   address?: string;
+//   city?: string;
+//   country: string;
+//   currency: string;
+//   timezone: string;
+//   workingDays: string[];
+//   workStart: string;
+//   workEnd: string;
+//   slotDuration: number;
+//   breakStart?: string;
+//   breakEnd?: string;
+//   whatsappEnabled: boolean;
+//   smsEnabled: boolean;
+//   emailEnabled: boolean;
+//   paymentEnabled: boolean;
+// }
+//
+// export interface Service {
+//   id: string;
+//   businessId: string;
+//   name: string;
+//   description?: string;
+//   duration: number;
+//   price: number;
+//   currency: string;
+//   color?: string;
+//   isActive: boolean;
+//   sortOrder: number;
+// }
+//
+// export interface Booking {
+//   id: string;
+//   bookingNumber: string;
+//   businessId: string;
+//   serviceId: string;
+//   customerId: string;
+//   date: string;
+//   startTime: string;
+//   endTime: string;
+//   status: 'pending' | 'confirmed' | 'completed' | 'cancelled' | 'no_show';
+//   customerName: string;
+//   customerPhone: string;
+//   customerEmail?: string;
+//   notes?: string;
+//   totalAmount?: number;
+//   currency: string;
+//   service?: Service;
+//   whatsappSent: boolean;
+//   smsSent: boolean;
+//   emailSent: boolean;
+//   createdAt: string;
+//   updatedAt: string;
+// }
+//
+// export interface TimeSlot {
+//   time: string;
+//   available: boolean;
+//   label: string;
+// }
+//
+// export interface DayOff {
+//   id: string;
+//   date: string;
+//   reason?: string;
+//   isRecurring: boolean;
+// }
+//
+// export interface PaginatedResponse<T> {
+//   data: T[];
+//   total: number;
+//   page: number;
+//   limit: number;
+//   totalPages: number;
+// }
+//
+// export interface DailyReport {
+//   date: string;
+//   totalBookings: number;
+//   confirmedBookings: number;
+//   cancelledBookings: number;
+//   completedBookings: number;
+//   noShowBookings: number;
+//   totalRevenue: number;
+//   bookings: Booking[];
+// }
+```
+
+---
+
+## 📱 معايير التصميم والـ UI/UX
+
+### الألوان الأساسية
+```
+الأساسي (Primary):     #3B82F6 (أزرق)
+النجاح (Success):      #22C55E (أخضر)
+التحذير (Warning):     #F59E0B (أصفر)
+الخطر (Danger):        #EF4444 (أحمر)
+الخلفية:               #F8FAFC (رمادي فاتح جداً)
+الخلفية البيضاء:       #FFFFFF
+النص الأساسي:          #1E293B (رمادي داكن)
+النص الثانوي:          #64748B (رمادي متوسط)
+الحدود:                #E2E8F0 (رمادي فاتح)
+```
+
+### الخطوط
+```
+العائلة: IBM Plex Sans Arabic (أو Tajawal أو Cairo)
+الحجم الأساسي: 16px
+العناوين: 24-32px
+النصوص الصغيرة: 14px
+الأرقام: use Arabic numerals (0-9) NOT Eastern Arabic (٠-٩)
+```
+
+### المسافات
+```
+استخدم Tailwind spacing كالتالي:
+Card padding: p-6
+Section gap: gap-6
+Element gap: gap-3 أو gap-4
+Page padding: px-4 md:px-8 lg:px-12
+```
+
+### الأنيميشن
+```
+- انتقالات بسيطة: transition-all duration-200
+- Hover: scale-[1.02] أو تغيير لون خفيف
+- Modal: fade in + slide up
+- Toast: slide in from top/right
+- لا تبالغ في الأنيميشن - النظام يجب أن يكون سريع وعملية
+```
+
+### التحقق من النماذج
+```
+- تحقق فوري (on change) مع رسائل خطأ واضحة بالعربي
+- رقم الجوال: يجب أن يبدأ بـ 5 ويكون 9 أرقام بعد الـ prefix
+- الاسم: حرفان على الأقل
+- كلمة المرور: 6 أحرف على الأقل
+- البريد: صيغة صحيحة (إذا تم إدخاله)
+- لا تُرسل الطلب إذا كان هناك أخطاء
+```
+
+### رسائل الخطأ العربية
+```
+- "هذا الحقل مطلوب"
+- "رقم الجوال غير صحيح"
+- "كلمة المرور يجب أن تكون 6 أحرف على الأقل"
+- "البريد الإلكتروني غير صحيح"
+- "هذا الرقم مسجل مسبقاً"
+- "رقم الجوال أو كلمة المرور غير صحيحة"
+- "حدث خطأ في الاتصال، حاول مرة أخرى"
+- "لا توجد أوقات متاحة في هذا اليوم"
+- "هذا الموعد محجوز مسبقاً، اختر وقتاً آخر"
+- "تم تأكيد الحجز بنجاح"
+- "تم إلغاء الحجز"
+- "تم إرسال التذكير بنجاح"
+```
+
+---
+
+## 🚀 خطوات النشر (Deployment)
+
+### Backend على Railway
+
+```bash
+# 1. إنشاء ملف Dockerfile في الـ backend
+FROM node:18-alpine
+WORKDIR /app
+COPY package*.json ./
+RUN npm ci --only=production
+COPY prisma ./prisma/
+RUN npx prisma generate
+COPY . .
+RUN npx prisma migrate deploy
+EXPOSE 5000
+CMD ["node", "server.js"]
+
+# 2. إنشاء ملف railway.json
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "builder": "NIXPACKS"
+  },
+  "deploy": {
+    "startCommand": "node server.js",
+    "restartPolicyType": "ON_FAILURE",
+    "restartPolicyMaxRetries": 10
+  }
+}
+
+# 3. ربط مشروع GitHub بـ Railway
+# 4. إعداد Environment Variables في Railway:
+#    - DATABASE_URL (استخدم Railway PostgreSQL plugin)
+#    - JWT_SECRET (قيمة عشوائية طويلة)
+#    - NODE_ENV=production
+#    - SMTP_* (إعدادات البريد)
+#    - FRONTEND_URL=https://your-domain.vercel.app
+
+# 5. تشغيل Migrations:
+#    npx prisma migrate deploy
+```
+
+### Frontend على Vercel
+
+```bash
+# 1. إنشاء ملف next.config.js
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'standalone',
+  images: {
+    domains: [],
+  },
+};
+
+module.exports = nextConfig;
+
+# 2. إعداد Environment Variables في Vercel:
+#    - NEXT_PUBLIC_API_URL=https://your-backend.railway.app/api
+
+# 3. ربط مشروع GitHub بـ Vercel
+# 4. إعدادات Build:
+#    - Framework Preset: Next.js
+#    - Root Directory: frontend
+#    - Build Command: npm run build
+#    - Output Directory: .next
+#    - Install Command: npm ci
+
+# 5. تخصيص الدومين (اختياري)
+```
+
+### قاعدة البيانات
+
+```
+# الخيار 1: Railway PostgreSQL (الأسهل)
+# - إضافة PostgreSQL plugin من Railway dashboard
+# - سيتم إنشاء DATABASE_URL تلقائياً
+
+# الخيار 2: Supabase (مجاني)
+# - إنشاء مشروع على Supabase
+# - نسخ connection string
+# - تشغيل: npx prisma db push
+
+# الخيار 3: Neon (مجاني)
+# - إنشاء مشروع على neon.tech
+# - نسخ connection string
+```
+
+---
+
+## ✅ قائمة التحقق النهائية (قبل التسليم)
+
+```
+frontend/
+  [ ] الصفحة الرئيسية تعمل وتعرض الخدمات
+  [ ] التقويم التفاعلي بالعربي يعمل
+  [ ] الأوقات المتاحة تُعرض بشكل صحيح
+  [ ] نموذج الحجز يرسل البيانات ويحفظ بنجاح
+  [ ] صفحة تأكيد الحجز تعرض الملخص
+  [ ] تسجيل الدخول يعمل
+  [ ] إنشاء حساب يعمل
+  [ ] لوحة التحكم تعرض الإحصائيات
+  [ ] إدارة الحجوزات (عرض، تأكيد، إلغاء، تذكير)
+  [ ] إدارة الخدمات (إضافة، تعديل، حذف)
+  [ ] التقارير تعمل (يومي، أسبوعي، شهري)
+  [ ] الإعدادات تُحفظ بنجاح
+  [ ] RTL يعمل بشكل صحيح في كل الصفحات
+  [ ] الخط العربي يظهر بشكل صحيح
+  [ ] الألوان والتصميم متسق
+  [ ] التعامل مع الأخطاء يعرض رسائل عربية
+  [ ] حالة التحميل (Loading) تظهر
+  [ ] الموبايل Responsive يعمل
+
+backend/
+  [ ] السيرفر يشتغل بدون أخطاء
+  [ ] جميع مسارات Auth تعمل
+  [ ] جميع مسارات Bookings تعمل
+  [ ] جميع مسارات Services تعمل
+  [ ] التقارير تعيد بيانات صحيحة
+  [ ] JWT Auth يعمل ويحمي المسارات
+  [ ] Role Guard يمنع الوصول غير المصرح
+  [ ] حساب الأوقات المتاحة صحيح
+  [ ] لا يسمح بحجز متعارض
+  [ ] لا يسمح بالحجز في يوم إجازة
+  [ ] لا يسمح بالحجز في وقت ماضي
+  [ ] إشعارات البريد الإلكتروني تعمل (مع Nodemailer)
+  [ ] معالجة الأخطاء مركزية تعمل
+  [ ] Prisma schema صحيح ومهاجرات تعمل
+  [ ] Seed data تم إدخالها بنجاح
+
+نشر/
+  [ ] Frontend يعمل على Vercel
+  [ ] Backend يعمل على Railway
+  [ ] قاعدة البيانات متصلة
+  [ ] CORS مُعدل بشكل صحيح
+  [ ] Environment Variables مُعدة
+  [ ] HTTPS يعمل
+  [ ] النظام يعمل كاملاً من المتصفح
+```
+
+---
+
+## ⚠️ ملاحظات مهمة جداً
+
+1. **كل النصوص في الواجهة بالعربي** - لا يوجد أي نص إنجليزي يظهر للمستخدم
+2. **كل التعليقات في الكود بالعربي** لسهولة الفهم والصيانة
+3. **لا تستخدم أي مكتبة UI جاهزة** (مثل shadcn أو MUI) - ابنِ المكونات بـ Tailwind من الصفر
+4. **لا تستخدم `any` في TypeScript** - عرّف الأنواع بشكل صحيح
+5. **لا تضع بيانات حساسة في الكود** - كل شيء من env
+6. **التقويم ابنيه بـ React خالص** - لا تستخدم FullCalendar أو مكتبات تقويم
+7. **استخدم `fetch` أو `axios`** للتعامل مع الـ API - لا تستخدم Server Actions لاستدعاء الـ backend
+8. **كل الـ API responses بهذا الشكل**: `{ success: true, data: ..., message: "رسالة عربية" }` أو `{ success: false, message: "رسالة خطأ عربية" }`
+9. **التعامل مع الأخطاء**: لا تستخدم alert() أبداً - استخدم Toast notifications
+10. **الأرقام**: استخدم الأرقام الإنجليزية (1, 2, 3) وليست الهندية (١، ٢، ٣) في الواجهة
+
+---
+
+## 📦 الـ Dependencies المطلوبة
+
+### Frontend (package.json)
+```json
+{
+  "dependencies": {
+    "next": "14.2.0",
+    "react": "^18.3.0",
+    "react-dom": "^18.3.0",
+    "axios": "^1.7.0",
+    "recharts": "^2.12.0",
+    "react-hot-toast": "^2.4.1",
+    "date-fns": "^3.6.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.4.0",
+    "@types/react": "^18.3.0",
+    "@types/node": "^20.12.0",
+    "tailwindcss": "^3.4.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0"
+  }
+}
+```
+
+### Backend (package.json)
+```json
+{
+  "dependencies": {
+    "express": "^4.19.0",
+    "cors": "^2.8.5",
+    "helmet": "^7.1.0",
+    "morgan": "^1.10.0",
+    "cookie-parser": "^1.4.6",
+    "jsonwebtoken": "^9.0.2",
+    "bcryptjs": "^2.4.3",
+    "@prisma/client": "^5.14.0",
+    "nodemailer": "^6.9.13",
+    "axios": "^1.7.0",
+    "dotenv": "^16.4.0",
+    "express-rate-limit": "^7.2.0",
+    "joi": "^17.13.0"
+  },
+  "devDependencies": {
+    "prisma": "^5.14.0",
+    "nodemon": "^3.1.0"
+  }
+}
+```
+
+---

@@ -1,0 +1,22 @@
+# render.yaml - Render Blueprint for backend deployment
+services:
+  - type: web
+    name: booking-system-api
+    runtime: node
+    region: frankfurt  # أقرب منطقة للشرق الأوسط
+    plan: free
+    rootDir: backend
+    buildCommand: npm ci && npx prisma generate && npx prisma db push
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false  # يتم إضافتها يدوياً من Supabase
+      - key: JWT_SECRET
+        generateValue: true
+      - key: JWT_EXPIRES_IN
+        value: 7d
+      - key: FRONTEND_URL
+        sync: false  # يتم إضافتها بعد نشر الـ Frontend
